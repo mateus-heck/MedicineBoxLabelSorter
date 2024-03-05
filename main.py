@@ -9,7 +9,7 @@ if image is None:
     raise ValueError("Invalid image file or path.")
 
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-blur = cv2.GaussianBlur(gray, (3, 3), 0)
+blur = cv2.GaussianBlur(gray, (3, 3), 0) #Mexer aqui
 bw = cv2.threshold(blur, 100, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
 kernel_size = (15, 1) 
