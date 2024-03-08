@@ -28,3 +28,16 @@ def measure_similarity(predicted):
 
     similarity = total_score / max(total_expected_chars, total_predicted_chars)
     return similarity
+
+
+def replace_chars(predict):
+    letter_mapping = {
+        'S': '5',
+        'o': '0',
+        'O': '0',
+        'l': '1',
+        'U': 'V'
+    }
+    for i, pred in enumerate(predict):
+        predict[i] = ''.join(letter_mapping.get(char, char) for char in pred)
+    return predict

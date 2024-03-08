@@ -1,6 +1,6 @@
 
 from predict import predict_image
-from utils import measure_similarity
+from utils import measure_similarity, replace_chars
 import easyocr
 
 tests = [
@@ -20,25 +20,13 @@ expect_results = [
     "Ilegível"
 ]
 
-letter_mapping = {
-    'S': '5',
-    'o': '0',
-    'O': '0',
-    'l': '1',
-    'U': 'V'
-}
-
-
 reader = easyocr.Reader(['en'])
 results = []
 
 for image_path in tests:
     predict, score = predict_image(reader, image_path)
     score_med = sum(score) / len(score)
-
-    for i, pred in enumerate(predict):
-        predict[i] = ''.join(letter_mapping.get(char, char) for char in pred)
-
+    predict = replace_chars(predict)    
     similarity_format = measure_similarity(predict)
 
     print("Previsão:", predict)
