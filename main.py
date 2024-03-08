@@ -1,40 +1,60 @@
-import cv2
-import pytesseract
+
+from predict import predict_image
+from utils import measure_similarity
 import easyocr
-import matplotlib.pyplot as plt
 
-image_path = r'img_tratada.png'
-image = cv2.imread(image_path)
-if image is None:
-    raise ValueError("Invalid image file or path.")
+tests = [
+    "images_to_test/img1.png",
+    "images_to_test/img2.png",
+    "images_to_test/img3.png",
+    "images_to_test/img4.png",
+    "images_to_test/img5.png",
+    "images_to_test/img6.png",
+]
+expect_results = [
+    "Legível", 
+    "Legível", 
+    "Legível", 
+    "Ilegível", 
+    "Ilegível", 
+    "Ilegível"
+]
 
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-blur = cv2.GaussianBlur(gray, (3, 3), 0) #Mexer aqui
-bw = cv2.threshold(blur, 100, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+letter_mapping = {
+    'S': '5',
+    'o': '0',
+    'O': '0',
+    'l': '1',
+    'U': 'V'
+}
 
-kernel_size = (15, 1) 
-kernel = cv2.getStructuringElement(cv2.MORPH_RECT, kernel_size)
-bw_closed = cv2.morphologyEx(bw, cv2.MORPH_CLOSE, kernel)
-contours, _ = cv2.findContours(bw_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-filtered_contours = [cnt for cnt in contours if (cv2.boundingRect(cnt)[2] / cv2.boundingRect(cnt)[3])>=3.0]
-sorted_contours = sorted(filtered_contours, key=lambda contour: cv2.boundingRect(contour)[1])
 
 reader = easyocr.Reader(['en'])
-predict = []
-padding=3
-for contour in sorted_contours:
-    x, y, w, h = cv2.boundingRect(contour)
-    x, y, w, h = (x-padding, y-padding, w+padding, h+padding) 
-    line_image = bw[y:y + h, x:x+w]
-    plt.imshow(cv2.cvtColor(line_image, cv2.COLOR_BGR2RGB))
-    plt.show()
-    raw_predict = reader.readtext(line_image)
-    if(len(raw_predict)>0):
-        cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
-        predict.append(raw_predict[0][1])
-    print("\nPredict: ", raw_predict)
-    print("Score: ", raw_predict)
+results = []
 
-plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-plt.axis('off')
-plt.show()
+for image_path in tests:
+    predict, score = predict_image(reader, image_path)
+    score_med = sum(score) / len(score)
+
+    for i, pred in enumerate(predict):
+        predict[i] = ''.join(letter_mapping.get(char, char) for char in pred)
+
+    similarity_format = measure_similarity(predict)
+
+    print("Previsão:", predict)
+    print("Media de Score:", score_med)
+    print("Média de Simularidade com formato:", similarity_format)
+    
+    if(score_med < 0.5 and similarity_format < 0.5):
+        print("Ilegível")
+        results.append("Ilegível")
+    elif((score_med > 0.5) or (similarity_format > 0.6)):
+        print("Legível")
+        results.append("Legível")
+
+matchs = sum(1 for x, y in zip(expect_results, results) if x == y)
+print(matchs, "/", len(expect_results))
+matchs_perc = (matchs / len(expect_results)) * 100
+
+print("Resultados:", results)
+print("Porcentagem de acertos:", matchs_perc, "%")
