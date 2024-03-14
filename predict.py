@@ -1,18 +1,25 @@
 import cv2
 import matplotlib.pyplot as plt
 from filtros import filter_image
+import numpy as np
+from PIL import Image as img
+
 
 def predict_image(reader, image_path, debug=False):
-  image = filter_image(cv2.imread(image_path))
+  image = cv2.imread(image_path)
   if debug:
     plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     plt.axis('off')
     plt.show()
+
+
+  image = filter_image(image)
+
   if image is None:
       raise ValueError("Invalid image file or path.")
 
   gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-  blur = cv2.GaussianBlur(gray, (5, 5), 0) #Mexer aqui
+  blur = cv2.GaussianBlur(gray, (3, 3), 0) #Mexer aqui
   bw = cv2.threshold(blur, 100, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
   kernel_size = (15, 1) 
@@ -30,16 +37,17 @@ def predict_image(reader, image_path, debug=False):
   sorted_contours = sorted(sorted_contours, key=lambda contour: cv2.boundingRect(contour)[1])
 
 
+
   
   predict = []
   score = []
-  padding=3
+  padding = 3
   for contour in sorted_contours:
       if debug:
         print("Width: ", cv2.boundingRect(contour)[2])
         print("Height: ", cv2.boundingRect(contour)[3])
       x, y, w, h = cv2.boundingRect(contour)
-      x, y, w, h = (x-padding, y-padding, w+padding, h+padding) 
+      x, y, w, h = (x-padding, y-padding, w+(padding*2), h+(padding*2)) 
       line_image = bw[y:y + h, x:x+w]
       kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,1))
       dilate_2 = cv2.dilate(line_image, kernel, iterations=1)
