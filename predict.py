@@ -3,10 +3,12 @@ import matplotlib.pyplot as plt
 from filtros import filter_image
 import numpy as np
 from PIL import Image as img
+from recorte import mark_text_regions
 
 
 def predict_image(reader, image_path, debug=False):
   image = cv2.imread(image_path)
+  #image = mark_text_regions(image_path, debug=debug)
   if debug:
     plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     plt.axis('off')
@@ -22,15 +24,16 @@ def predict_image(reader, image_path, debug=False):
   blur = cv2.GaussianBlur(gray, (3, 3), 0) #Mexer aqui
   bw = cv2.threshold(blur, 100, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
-  kernel_size = (15, 1) 
+  kernel_size = (20, 1) 
   kernel = cv2.getStructuringElement(cv2.MORPH_RECT, kernel_size)
   bw_closed = cv2.morphologyEx(bw, cv2.MORPH_CLOSE, kernel)
   if debug:
-      plt.imshow(cv2.cvtColor(bw, cv2.COLOR_BGR2RGB))
+      plt.imshow(cv2.cvtColor(bw_closed, cv2.COLOR_BGR2RGB))
       plt.show()
+  
   contours, _ = cv2.findContours(bw_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
   filtered_contours = [cnt for cnt in contours if (cv2.boundingRect(cnt)[2] / cv2.boundingRect(cnt)[3])>=3.0]
-  min_width = 80
+  min_width = 40
 
 
   sorted_contours = [contour for contour in filtered_contours if cv2.boundingRect(contour)[2] >= min_width]
@@ -49,13 +52,17 @@ def predict_image(reader, image_path, debug=False):
       x, y, w, h = cv2.boundingRect(contour)
       x, y, w, h = (x-padding, y-padding, w+(padding*2), h+(padding*2)) 
       line_image = bw[y:y + h, x:x+w]
-      kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,1))
-      dilate_2 = cv2.dilate(line_image, kernel, iterations=1)
+      try:
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,1))
+        dilate_2 = cv2.dilate(line_image, kernel, iterations=1)
+        blur_2 = cv2.GaussianBlur(dilate_2, (3, 3), 0)
+      except:
+        continue
       if debug:
-        plt.imshow(cv2.cvtColor(dilate_2, cv2.COLOR_BGR2RGB))
+        plt.imshow(cv2.cvtColor(blur_2, cv2.COLOR_BGR2RGB))
         plt.show()
       
-      raw_predict = reader.readtext(dilate_2)
+      raw_predict = reader.readtext(blur_2)
       if(len(raw_predict)>0):
           cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
           predict.append(raw_predict[0][1])

@@ -1,8 +1,20 @@
-def measure_similarity(predicted):
-    expected_format = ["NN:NN", "LNN/NN", "LNN/NN", "LNNLNNN"]
-    if len(predicted) != len(expected_format) or len(predicted) == 0:
-        return 0
+expected_format = ["NN:NN", "LNN/NN", "LNN/NN", "LNNLNNN"]
+expected_size = 4
 
+letter_mapping = {
+        'S': '5',
+        'o': '0',
+        'O': '0',
+        'l': '1',
+        'U': 'V',
+        'z': '2',
+        'I': '1',
+    }
+
+def measure_similarity(predicted):
+    if len(predicted) != expected_size or len(predicted) == 0:
+        return 0
+    identify_F_or_hour(predicted)
     total_score = 0
     total_expected_chars = 0
     total_predicted_chars = 0
@@ -19,25 +31,31 @@ def measure_similarity(predicted):
             else:
                 total_score -= 1
 
-            if e in ('N', 'L', 'X'):
+            if e in ('N', 'L'):
                 total_expected_chars += 1
             if p.isdigit() or p.isalpha():
                 total_predicted_chars += 1
             if(len(pred) != len(exp)):
-                total_score -= 0.31
+                print("Predict: ", pred)
+                print("Expected: ", exp)
+                print("Tamanhos diferentes")
+                total_score -= 0.15
 
     similarity = total_score / max(total_expected_chars, total_predicted_chars)
     return similarity
 
 
+def identify_F_or_hour(predicted):
+    print("Predicted: ", predicted[0])
+    print("Predicted: ", predicted[0][1])
+    if(predicted[0][0] == "F"):
+        aux = predicted[0]
+        predicted[0] = predicted[1]
+        predicted[1] = aux
+    return predicted
+
+
 def replace_chars(predict):
-    letter_mapping = {
-        'S': '5',
-        'o': '0',
-        'O': '0',
-        'l': '1',
-        'U': 'V'
-    }
     for i, pred in enumerate(predict):
         predict[i] = ''.join(letter_mapping.get(char, char) for char in pred)
     return predict
