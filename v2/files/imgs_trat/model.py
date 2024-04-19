@@ -1,71 +1,71 @@
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization, Activation
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+# Diretórios dos dados
+diretorio_treinamento = 'files/imgs_trat/imgs'
+diretorio_validacao = 'files/imgs_trat/valid_imgs'
 
 
-# Diretório contendo as imagens de treinamento
-diretorio_treinamento = 'imgs_trat\imgs'
-
-# Diretório contendo as imagens de validação
-diretorio_validacao = r'imgs_trat\valid_imgs'
-
-# Configuração do ImageDataGenerator para pré-processamento de dados
 train_datagen = ImageDataGenerator(
-    rescale=1./255,  # Normaliza os valores dos pixels para o intervalo [0, 1]
-    rotation_range=40,
-    width_shift_range=0.2,
-    height_shift_range=0.2,
-    shear_range=0.2,
-    zoom_range=0.2,
+    rescale=1./255, 
+    rotation_range=20,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
+    shear_range=0.1,
+    zoom_range=0.1,
     horizontal_flip=True,
     fill_mode='nearest'
 )
 
-# Configuração do ImageDataGenerator para dados de validação (apenas rescaling)
 validation_datagen = ImageDataGenerator(rescale=1./255)
 
-# Carrega e pré-processa as imagens de treinamento em lotes
+batch_size = 3
 train_generator = train_datagen.flow_from_directory(
-    diretorio_treinamento,  # Diretório contendo as imagens de treinamento
-    target_size=(400, 200),  # Redimensiona as imagens para o tamanho desejado
-    batch_size=1,
-    class_mode='binary'  # Modo de classificação binária (certa/errada)
+    diretorio_treinamento,  
+    target_size=(300, 150),
+    batch_size=batch_size,
+    class_mode='binary'
 )
 
-# Carrega e pré-processa as imagens de validação em lotes
 validation_generator = validation_datagen.flow_from_directory(
-    diretorio_validacao,  # Diretório contendo as imagens de validação
-    target_size=(400, 200),  # Redimensiona as imagens para o tamanho desejado
-    batch_size=1,
-    class_mode='binary'  # Modo de classificação binária (certa/errada)
+    diretorio_validacao, 
+    target_size=(300, 150), 
+    batch_size=batch_size,
+    class_mode='binary'
 )
 
-
-# Defina a arquitetura do modelo
 model = Sequential([
-    Conv2D(32, (3, 3), activation='relu', input_shape=(400, 200, 1)),
+    Conv2D(32, (3, 3), strides=(2, 2), padding='same', input_shape=(300, 150, 3)),
+    BatchNormalization(),
+    Activation('relu'),
     MaxPooling2D((2, 2)),
-    Conv2D(64, (3, 3), activation='relu'),
-    MaxPooling2D((2, 2)),
-    Conv2D(128, (3, 3), activation='relu'),
-    MaxPooling2D((2, 2)),
+
     Flatten(),
-    Dense(128, activation='relu'),
-    Dropout(0.5),
+    Dense(64, activation='relu'),
+    Dropout(0.4),
     Dense(1, activation='sigmoid')
 ])
 
-# Compile o modelo
-model.compile(optimizer='adam',
+optimizer = Adam(learning_rate=0.001)
+model.compile(optimizer=optimizer,
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-# Treine o modelo
+epochs = 20
 history = model.fit(
     train_generator,
-    epochs=100,
-    validation_data=train_generator
+    epochs=epochs,
+    validation_data=validation_generator
 )
 
 model.save('modelo_1_90.h5')
+
+
+saved_model = load_model('modelo_1_90.h5')
+
+validation_loss, validation_accuracy = saved_model.evaluate(validation_generator)
+
+print(f'Acurácia no conjunto de validação: {validation_accuracy}')
+print(f'Perda no conjunto de validação: {validation_loss}')

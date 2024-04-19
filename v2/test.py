@@ -94,3 +94,4 @@ print(results)
 
 #show_imgs([img, seg_regiao, text_area, erosao_img, dilate_img, erosao_test, img_contours])
 
+
