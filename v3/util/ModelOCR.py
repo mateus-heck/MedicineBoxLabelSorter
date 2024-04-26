@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 
 
-
 class ModelOCR:
     def __init__(self):
         self.model = easyocr.Reader(['en'])
@@ -42,7 +41,6 @@ class ModelOCR:
           else:
             if(count < len(self.patterns)):
               img_text = cv2.blur(img_text, (5,3))
-              print(self.confiability(self.run(img_text)))
               predicts.append(self.confiability(self.run(img_text)))
           count += 1
       return predicts

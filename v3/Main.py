@@ -22,12 +22,13 @@ class Main:
     def run(self):
       modelOCR = ModelOCR()
       filenames = self.loadingImagens()
+      
       start = time.time()
       for img_array, filename  in zip(self.images, filenames):
-          predicts = self.useModel(img_array, modelOCR)
-          if(self.debug): print(f"Predictions for {filename}: {predicts}")
-          result = self.classify(predicts, filename)
-          print(f"Imagem {filename} é {result}")
+        predicts = self.useModel(img_array, modelOCR)
+        if(self.debug): print(f"Predictions for {filename}: {predicts}")
+        result = self.classify(predicts, filename)
+        print(f"Imagem {filename} é {result}")
       end = time.time()
       print(f"Tempo de execução: {end-start} segundos")
       print(f"Tempo de execução para 300: {((end-start)/(len(self.Readable) + len(self.Not_Readable)))*300} segundos")
@@ -60,14 +61,14 @@ class Main:
             return "Ilegível"
 
 
-
 if __name__ == "__main__":
     debugMode = False
     helper = Helper(debugMode)
     imageProcessor = ImageProcessor(debugMode)
     findLines = FindLines(debugMode)
-    main = Main(imageProcessor, findLines, debug=debugMode)
-    main.run()
-    print(f"Legíveis: {main.Readable}")
-    print(f"Ilegíveis: {main.Not_Readable}")
-    print(f"Total lido: {len(main.Readable)+len(main.Not_Readable)} imagens")
+    main_instance = Main(imageProcessor, findLines, debug=debugMode)
+    main_instance.run()
+    print(f"Legíveis: {main_instance.Readable}")
+    print(f"Ilegíveis: {main_instance.Not_Readable}")
+    print(f"Total lido: {len(main_instance.Readable) + len(main_instance.Not_Readable)} imagens")
+

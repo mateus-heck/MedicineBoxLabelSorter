@@ -11,19 +11,15 @@ class ImageProcessor(Helper):
     return img_flat
 
   def segmenta2regioes(self, img):
-    _, thresh = cv2.threshold(img, 150, 255, cv2.THRESH_BINARY)
-    self.images.append(thresh)
+    # for i in range(len(pixels)):
+    #   if pixels[i] > 150:
+    #     pixels[i] = 255
+    #   else:
+    #     pixels[i] = 0
+    # seg_regiao = pixels.reshape(img.shape[0], img.shape[1])
+    ret, thresh = cv2.threshold(img, 150, 255, cv2.THRESH_BINARY)
     return thresh
 
-  def segmenta2regioes2(self, img):
-    pixels = self.flatten_img(img).copy()
-    for i in range(len(pixels)):
-      if pixels[i] > 150:
-        pixels[i] = 255
-      else:
-        pixels[i] = 0
-    seg_regiao = pixels.reshape(img.shape[0], img.shape[1])
-    return seg_regiao
 
   def desfoqueGaussiano(self, img):
     
