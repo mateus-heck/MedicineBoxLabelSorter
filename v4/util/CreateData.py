@@ -36,10 +36,8 @@ class Create_dataset:
     
     #Randomize Text
     def generate_random_text(self):
-        #randomiza os caracteres alfabéticos mantendom F:fabricação e V:validade
-        random_lote = ''.join(random.choice(string.ascii_uppercase) if char.isalpha() and char not in ["F", "V"] else char for char in self.tmplt_text)
-        #randomiza os números do texto (inclusive datas, mesmo que invalidas tem o intuíto de testar o maior número de combinações)
-        random_text = ''.join(random.choice(string.digits) if char.isdigit() else char for char in random_lote)
+        random_lote = ''.join(random.choice(string.ascii_uppercase) if char.isalpha() and char not in ["F", "V"] else char for char in self.tmplt_text) #Randomize alfa chars outside of F and V
+        random_text = ''.join(random.choice(string.digits) if char.isdigit() else char for char in random_lote) #Randomize all numbers
         return random_text
     
     #Create image using PIL
