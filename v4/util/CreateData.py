@@ -1,5 +1,4 @@
 import string
-import os 
 from PIL import ImageDraw, ImageFont
 from PIL.Image import new
 import pandas as pd
