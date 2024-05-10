@@ -7,6 +7,7 @@ import numpy as np
 import random
 import cv2 as cv
 import math 
+from skimage.util import random_noise
 
 #Template text
 tmplt_text = 'F00/00      00:00\nV00/00\nA00A000'
@@ -32,13 +33,11 @@ def generate_random_text():
 def create_img():
     bg_color = random.randint(min_c_bg, max_c_bg) #background color
     font_color = random.randint(min_c_font, max_c_font) # font color
-    # img = new(mode="RGB", size=(500,130), color=(bg_color, bg_color, bg_color)) #create canvas
-    img = new(mode="RGB", size=(500,130), color=(255,255,255)) #create canvas
+    img = new(mode="RGB", size=(500,130), color=(bg_color, bg_color, bg_color)) #create canvas
     font = ImageFont.truetype("v4/assets/DotFontMatrix.ttf", 50) #font path & size
     text = generate_random_text() #call function
     draw = ImageDraw.Draw(img) #specify where to write
-    # draw.text((6,8), text, fill=(font_color, font_color, font_color), font=font) #write text
-    draw.text((6,8), text, fill=(0,0,0), font=font) #write text
+    draw.text((6,8), text, fill=(font_color, font_color, font_color), font=font) #write text
     # img.show() #show img
     return img
 
@@ -75,26 +74,16 @@ def text_distortion():
     return img_output
 
 # Função para adicionar pontos aleatórios na imagem
-def remove_random_dot():
+def acceptable_noise():
     img = convert_pil_cv()
-    #define a quantidade de pontos
-    for _ in range(random.randint(20, 100)):
-        #define a cor do ponto , [187, 184, 175]
-        cor_ponto = random.choice([[0, 0, 0], [255,255,255]])
-        #define o posicionamento do ponto
-        x, y= random.randint(230,1100), random.randint(230,550)
-        #posiciona o ponto na imagem
-        if cor_ponto == [0, 0, 0]:
-            cv.circle(img, (x, y), 3, (cor_ponto), -1)
-        else:
-            cv.circle(img, (x, y), 10, (cor_ponto), -1)
-    return img
-
-
+    mode = random.choice(["pepper", "gaussian"])
+    skimage_img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+    noise_img = random_noise(skimage_img, mode=mode)
+    return noise_img
 
 # img = blur_img()
 # img = text_distortion()
-img = remove_random_dot()
+img = acceptable_noise()
 cv.imshow("teste", img) 
 blur_img()
 cv.waitKey(0)
