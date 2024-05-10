@@ -8,6 +8,7 @@ import math
 from PIL import Image, ImageDraw, ImageFont
 import tqdm
 import pandas as pd
+import tqdm
 
 #apagar as imagens da pasta god e bad
 def remove_files(directory):
