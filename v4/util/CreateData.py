@@ -38,47 +38,43 @@ def create_img():
     text = generate_random_text() #call function
     draw = ImageDraw.Draw(img) #specify where to write
     draw.text((6,8), text, fill=(font_color, font_color, font_color), font=font) #write text
-    # img.show() #show img
     return img
 
 def convert_pil_cv():
     img = create_img()
-    img = img.convert("RGB")
-    cv_img = np.array(img)  
+    img = img.convert("RGB") #Convert to RGB
+    cv_img = np.array(img)  #Convert to array
     cv_img = cv_img[:, :, ::-1].copy() # Convert RGB to BGR
     return cv_img
 
 def blur_img():    
-    img = convert_pil_cv()
-    blur = random.randint(min_blur,max_blur)
-    img = cv.blur(img,(blur,blur))
+    img = convert_pil_cv() 
+    blur = random.randint(min_blur,max_blur) #Randomize blur
+    img = cv.blur(img,(blur,blur)) #Aplly blur
     return img
 
 def text_distortion():
     img = convert_pil_cv()
-    ond = random.randint(min_ond_numb,max_ond_numb)
-    angle = random.randint(min_angle,max_angle)
-    #define a imagem de saída
-    rows, cols, _ = img.shape
-    #cria uma imagem de destino
-    img_output = np.zeros(img.shape, dtype=img.dtype)
-    #aplica a distorção 
+    ond = random.randint(min_ond_numb,max_ond_numb) #Randomize n° ondulation
+    angle = random.randint(min_angle,max_angle) #Randomize ondulation size
+    rows, cols, _ = img.shape #Define image size
+    img_output = np.zeros(img.shape, dtype=img.dtype) #Define output
     for n in range(rows):
         for j in range(cols):
-            offset_x = 1
-            offset_y = int(ond * math.cos(angle * math.pi * j / 300))
-            if n+offset_y < rows and j+offset_x < cols:
-                img_output[n,j] = img[(n+offset_y)%rows,(j+offset_x)%cols]
+            offset_x = 1 #Changing X axis pixel destination
+            offset_y = int(ond * math.cos(angle * math.pi * j / 300)) #Changing Y axis pixel destination
+            if n+offset_y < rows and j+offset_x < cols: #Check if the pixel is inside the original image
+                img_output[n,j] = img[(n+offset_y)%rows,(j+offset_x)%cols] #Move pixel to destination
             else:
-                img_output[n,j] = 0
+                img_output[n,j] = 0 #If destination is outside of the original image set color to black
     return img_output
 
 # Função para adicionar pontos aleatórios na imagem
 def acceptable_noise():
     img = convert_pil_cv()
-    mode = random.choice(["pepper", "gaussian"])
-    skimage_img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-    noise_img = random_noise(skimage_img, mode=mode)
+    mode = random.choice(["pepper", "gaussian"]) #Randomize noise mode
+    skimage_img = cv.cvtColor(img, cv.COLOR_BGR2RGB) #Convert img to be readable by skimage
+    noise_img = random_noise(skimage_img, mode=mode) #Apply noise mode
     return noise_img
 
 # img = blur_img()
