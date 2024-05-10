@@ -6,7 +6,6 @@ import numpy as np
 import random
 import cv2 as cv
 import math 
-from skimage.util import random_noise
 import tqdm
 
 class Create_dataset:
