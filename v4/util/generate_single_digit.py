@@ -36,5 +36,4 @@ for i in possible_fonts: #iterate over fonts
             font_type = "italic" 
         else: 
             font_type = "regular"
-        cv2.imwrite(f"v4/assets/single_digits/base/{j}_{font_type}.png", img) #save image
-        
+        cv2.imwrite(f"v4/assets/single_digits/{font_type}/{j}.png", img) #save image
